@@ -1,6 +1,6 @@
 import { useState } from "react";
 import botAvatar from "../assets/bot_avatar.jpg";
-import TextBox from "./TextBox";
+import TextBox from "./TextBox/TextBox";
 
 const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
