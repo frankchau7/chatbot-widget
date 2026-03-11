@@ -1,9 +1,12 @@
 import { useState } from "react";
-import botAvatar from "../assets/bot_avatar.jpg";
-import sendIcon from "../assets/send_icon.png";
+import botAvatar from "../../assets/bot_avatar.jpg";
+import sendIcon from "../../assets/send_icon.png";
 import type { Message } from "../../types";
+import { SEND_MESSAGE_MUTATION } from "./mutations";
+import { useMutation } from "@apollo/client/react";
 
 const TextBox = () => {
+  const [sendMessage] = useMutation(SEND_MESSAGE_MUTATION);
   const [messages, setMessages] = useState<Message[]>([{
     id: crypto.randomUUID(),
     content: "Hi! How can I help you today?",
@@ -26,6 +29,19 @@ const TextBox = () => {
     setMessages([...messages, newMessage]);
     setInput("");
     setIsSending(true);
+    try {
+      //TODO: fix the type of the data
+      sendMessage({ variables: { content: trimmed } }).then(({ data }: any) => {
+        if (data?.sendMessage) {
+          setMessages([...messages, data.sendMessage]);
+        }
+      });
+    } catch (error) {
+      console.error("Error sending message:", error);
+    } finally {
+      setIsSending(false);
+    }
+  
   };
 
   return (
