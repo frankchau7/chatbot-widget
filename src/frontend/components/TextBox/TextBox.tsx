@@ -1,22 +1,27 @@
 import { useState } from "react";
 import botAvatar from "../../assets/bot_avatar.jpg";
 import sendIcon from "../../assets/send_icon.png";
-import type { Message } from "../../types";
+import type { Message, Session } from "../../types";
 import { SEND_MESSAGE_MUTATION } from "./mutations";
 import { useMutation } from "@apollo/client/react";
 
+interface SendMessageData {
+  sendMessage: Session;
+}
+
 const TextBox = () => {
-  const [sendMessage] = useMutation(SEND_MESSAGE_MUTATION);
+  const [sendMessage] = useMutation<SendMessageData>(SEND_MESSAGE_MUTATION);
+  const [sessionId] = useState(() => crypto.randomUUID());
   const [messages, setMessages] = useState<Message[]>([{
     id: crypto.randomUUID(),
     content: "Hi! How can I help you today?",
-    sender: "bot",
+    sender: "assistant",
     timestamp: new Date(),
   }]);
   const [isSending, setIsSending] = useState(false);
   const [input, setInput] = useState("");
 
-  const handleMessageSend = () => {
+  const handleMessageSend = async () => {
     const trimmed = input.trim();
     if (!trimmed) return;
 
@@ -26,22 +31,29 @@ const TextBox = () => {
       sender: "user",
       timestamp: new Date(),
     };
-    setMessages([...messages, newMessage]);
+    setMessages((prev) => [...prev, newMessage]);
     setInput("");
     setIsSending(true);
     try {
-      //TODO: fix the type of the data
-      sendMessage({ variables: { content: trimmed } }).then(({ data }: any) => {
-        if (data?.sendMessage) {
-          setMessages([...messages, data.sendMessage]);
-        }
+      const { data } = await sendMessage({
+        variables: { sessionId, content: trimmed },
       });
+      if (data?.sendMessage) {
+        const session = data.sendMessage;
+        // Use session messages from server, filtering out system prompt
+        const serverMessages: Message[] = session.messages
+          .filter((m: Message) => m.sender !== "system")
+          .map((m: Message) => ({
+            ...m,
+            timestamp: new Date(m.timestamp),
+          }));
+        setMessages(serverMessages);
+      }
     } catch (error) {
       console.error("Error sending message:", error);
     } finally {
       setIsSending(false);
     }
-  
   };
 
   return (
@@ -62,7 +74,7 @@ const TextBox = () => {
       </div>
 
       {/* Conversation area */}
-      <div className="px-4 py-3 h-[250px] w-[350px] overflow-y-auto space-y-4 bg-white">
+      <div className="px-4 py-3 h-[500px] w-[350px] overflow-y-auto space-y-4 bg-white text-left">
         {messages.map((message) => {
           const time =
             message.timestamp instanceof Date
@@ -73,7 +85,7 @@ const TextBox = () => {
             minute: "2-digit",
           });
 
-          const isBot = message.sender === "bot";
+          const isBot = message.sender === "assistant";
 
           if (isBot) {
             // Bot message: left side, avatar + bubble, time on right of bubble
