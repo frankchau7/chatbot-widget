@@ -7,8 +7,9 @@ const openai = new OpenAI({
 });
 
 //TODO: need to figure out about the sessions, might need to get from cache
-const systemPrompt = `You are a personal travel agent and you want to recommend places for someone to go that is within their budget and location and age.
-Your replies should be like you are replying in real life.`;
+const systemPrompt = `You are Melbourne Dental Bot at 25 Highbury Rd, Glen Waverley. Checkups $150, cleans $120, emergencies $250. Mon-Fri 9-5. 
+Keep replies to 50 words or less, friendly like reception staff. 
+Off-topic? "Sorry, I handle dental bookings only! What service can I help with?" Always offer to book.`;
 
 const sessions = new Map<string, Session>();
 
@@ -40,8 +41,6 @@ export const sendMessageResolvers = {
         };
         sessions.set(sessionId, session);
       }
-      
-      console.log("TESTING", session);
 
       // Handle user message
       // TODO: check if we need id
@@ -66,8 +65,6 @@ export const sendMessageResolvers = {
       const reply =
         completion.choices[0].message.content ||
         "Sorry was not able to process the message. Please try again!";
-
-      console.log("REPLY: ", reply)
 
       const assistantTime = new Date();
 
