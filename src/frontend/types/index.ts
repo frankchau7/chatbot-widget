@@ -9,3 +9,8 @@ export interface Session {
   id: string;
   messages: Message[];
 }
+
+export interface MessageProps {
+  message: Message;
+  timeLabel: string;
+}
