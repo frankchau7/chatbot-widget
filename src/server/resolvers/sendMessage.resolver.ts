@@ -32,11 +32,10 @@ export const sendMessageResolvers = {
           id: sessionId,
           messages: [
             {
-              id: 0,
               content: systemPrompt,
               sender: "system",
               timestamp: now.toISOString(),
-            },
+            }
           ],
         };
         sessions.set(sessionId, session);

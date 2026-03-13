@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Message, Session } from "../../types";
 import { SEND_MESSAGE_MUTATION } from "./mutations";
 import { useMutation } from "@apollo/client/react";
 import { BotMessage } from "../Message/BotMessage";
 import { UserMessage } from "../Message/UserMessage";
+import { TypingIndicator } from "../Message/TypingIndicator";
 import { TextInput } from "./TextInput";
 import { Banner } from "./Banner";
 
@@ -11,17 +12,16 @@ interface SendMessageData {
   sendMessage: Session;
 }
 
+const initialMessage: Message = {
+  content: "Hi! How can I help you today?",
+  sender: "assistant",
+  timestamp: new Date(),
+};
+
 const TextBox = () => {
   const [sendMessage] = useMutation<SendMessageData>(SEND_MESSAGE_MUTATION);
   const [sessionId] = useState(() => crypto.randomUUID());
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: crypto.randomUUID(),
-      content: "Hi! How can I help you today?",
-      sender: "assistant",
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([initialMessage]);
   const [isSending, setIsSending] = useState(false);
   const [input, setInput] = useState("");
 
@@ -30,7 +30,6 @@ const TextBox = () => {
     if (!trimmed) return;
 
     const newMessage: Message = {
-      id: crypto.randomUUID(),
       content: trimmed,
       sender: "user",
       timestamp: new Date(),
@@ -51,7 +50,7 @@ const TextBox = () => {
             ...m,
             timestamp: new Date(m.timestamp),
           }));
-        setMessages(serverMessages);
+        setMessages([initialMessage, ...serverMessages]);
       }
     } catch (error) {
       console.error("Error sending message:", error);
@@ -60,12 +59,29 @@ const TextBox = () => {
     }
   };
 
+  // ensure that the conversation area sticks to the bottom
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = useCallback(() => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isSending, scrollToBottom]);
+
   return (
     <div className="w-full max-w-md bg-white text-black rounded-xl shadow-lg overflow-hidden">
       <Banner />
 
       {/* Conversation area */}
-      <div className="px-4 py-3 h-[500px] w-[350px] overflow-y-auto space-y-4 bg-white text-left">
+      <div
+        ref={messagesContainerRef}
+        className="px-4 py-3 h-[500px] w-[350px] overflow-y-auto space-y-4 bg-white text-left"
+        style={{ scrollBehavior: 'smooth' }}
+      >
         {messages.map((message) => {
           const time =
             message.timestamp instanceof Date
@@ -84,6 +100,7 @@ const TextBox = () => {
 
           return <UserMessage message={message} timeLabel={timeLabel} />;
         })}
+        {isSending && <TypingIndicator />}
       </div>
 
       {!isSending && (

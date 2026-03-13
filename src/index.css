@@ -68,3 +68,24 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Typing indicator dots */
+@keyframes typing-bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.typing-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #94a3b8; /* slate-400 */
+  animation: typing-bounce 1.4s ease-in-out infinite;
+}
