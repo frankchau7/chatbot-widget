@@ -1,6 +1,11 @@
 @import "tailwindcss";
 
 :root {
+  --theme-color: #9333ea; /* purple-600 */
+  --theme-color-dark: #7e22ce; /* purple-700 */
+  --theme-color-light: #f3e8ff; /* purple-100 */
+  --theme-color-ring: rgba(147, 51, 234, 0.1); /* purple-100/10 */
+
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;

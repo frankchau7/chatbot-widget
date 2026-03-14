@@ -25,7 +25,7 @@ const Home = () => (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* General Dentistry Card */}
         <div className="bg-slate-50 rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col gap-6">
-          <h3 className="text-xl font-bold text-sky-800 border-b border-sky-100 pb-2">General Dentistry</h3>
+          <h3 className="text-xl font-bold text-purple-800 border-b border-purple-100 pb-2">General Dentistry</h3>
           <div className="space-y-4">
             <ServiceBox content="Check-up and teeth cleaning" />
             <ServiceBox content="Dental fillings" />
@@ -35,7 +35,7 @@ const Home = () => (
 
         {/* Cosmetic Dentistry Card */}
         <div className="bg-slate-50 rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col gap-6">
-          <h3 className="text-xl font-bold text-sky-800 border-b border-sky-100 pb-2">Cosmetic Dentistry</h3>
+          <h3 className="text-xl font-bold text-purple-800 border-b border-purple-100 pb-2">Cosmetic Dentistry</h3>
           <div className="space-y-4">
             <ServiceBox content="Teeth whitening" />
             <ServiceBox content="dental veneers" />
@@ -44,7 +44,7 @@ const Home = () => (
 
         {/* Orthodontics Card */}
         <div className="bg-slate-50 rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col gap-6">
-          <h3 className="text-xl font-bold text-sky-800 border-b border-sky-100 pb-2">Orthodontics</h3>
+          <h3 className="text-xl font-bold text-purple-800 border-b border-purple-100 pb-2">Orthodontics</h3>
           <div className="space-y-4">
             <ServiceBox content="Invisalign" />
             <ServiceBox content="Clearcorrect" />
@@ -64,7 +64,7 @@ function App() {
         <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-40 border-b border-slate-100 px-6 h-16 flex items-center justify-between">
           <Link 
             to="/"
-            className="text-xl font-bold text-sky-700 hover:opacity-80 transition-opacity"
+            className="text-xl font-bold text-purple-700 hover:opacity-80 transition-opacity"
           >
             FCXO Dental
           </Link>
@@ -72,7 +72,7 @@ function App() {
             <NavLink 
               to="/"
               className={({ isActive }) => 
-                `text-sm font-semibold transition-colors uppercase tracking-wider ${isActive ? 'text-sky-600' : 'text-slate-600 hover:text-sky-600'}`
+                `text-sm font-semibold transition-colors uppercase tracking-wider ${isActive ? 'text-purple-600' : 'text-slate-600 hover:text-purple-600'}`
               }
             >
               SERVICES
@@ -80,12 +80,12 @@ function App() {
             <NavLink 
               to="/about"
               className={({ isActive }) => 
-                `text-sm font-semibold transition-colors uppercase tracking-wider ${isActive ? 'text-sky-600' : 'text-slate-600 hover:text-sky-600'}`
+                `text-sm font-semibold transition-colors uppercase tracking-wider ${isActive ? 'text-purple-600' : 'text-slate-600 hover:text-purple-600'}`
               }
             >
               ABOUT US
             </NavLink>
-            <a href="#locations" className="text-sm font-semibold text-slate-600 hover:text-sky-600 transition-colors uppercase tracking-wider">LOCATIONS</a>
+            <a href="#locations" className="text-sm font-semibold text-slate-600 hover:text-purple-600 transition-colors uppercase tracking-wider">LOCATIONS</a>
           </nav>
           <div className="w-24" /> {/* Spacer to balance the logo */}
         </header>

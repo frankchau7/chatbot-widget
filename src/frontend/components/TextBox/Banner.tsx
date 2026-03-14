@@ -23,9 +23,9 @@ export const Banner = ({ onEditDetails, onEndConversation, readOnly, showMenu = 
   }, []);
 
   return (
-    <div className="relative flex items-center justify-between bg-slate-100 px-4 h-16 border-b border-slate-200">
+    <div className="relative flex items-center justify-between px-4 h-16 border-b shadow-sm" style={{ backgroundColor: 'var(--theme-color)', borderColor: 'var(--theme-color-dark)' }}>
       <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow">
+        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
           <img
             src={botAvatar}
             alt="Chatbot avatar"
@@ -33,8 +33,8 @@ export const Banner = ({ onEditDetails, onEndConversation, readOnly, showMenu = 
           />
         </div>
         <div className="flex flex-col justify-center leading-tight">
-          <span className="text-sm font-semibold">Chatbot</span>
-          <span className="text-xs text-slate-500">Ask me anything</span>
+          <span className="text-sm font-bold text-white">Chatbot</span>
+          <span className="text-[10px] text-white/80 font-medium uppercase tracking-wider">Ask me anything</span>
         </div>
       </div>
       <div className="flex-1" />
@@ -42,11 +42,12 @@ export const Banner = ({ onEditDetails, onEndConversation, readOnly, showMenu = 
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="text-slate-400 hover:text-slate-600 transition-colors p-0 w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full shrink-0 aspect-square cursor-pointer"
+            className="text-white/80 hover:text-white transition-colors p-0 w-8 h-8 flex items-center justify-center rounded-full shrink-0 aspect-square cursor-pointer"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
             aria-label="Menu"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="3" y1="12" x2="21" y2="12"></line>
               <line x1="3" y1="6" x2="21" y2="6"></line>
               <line x1="3" y1="18" x2="21" y2="18"></line>

@@ -10,7 +10,10 @@ export const UserMessage = ({message, timeLabel}: MessageProps) => {
   return (
     <div key={message.id} className="flex justify-end items-start gap-2">
       <div className="flex max-w-[70%] min-w-0 flex-col items-end">
-        <div className="w-full bg-sky-500 text-white rounded-2xl px-3 py-2 text-sm break-words whitespace-pre-wrap overflow-hidden">
+        <div 
+          className="w-full text-white rounded-2xl px-3 py-2 text-sm shadow-sm break-words whitespace-pre-wrap overflow-hidden"
+          style={{ backgroundColor: 'var(--theme-color)' }}
+        >
           {message.content}
         </div>
         <span className="mt-1 self-start text-[10px] text-slate-400">

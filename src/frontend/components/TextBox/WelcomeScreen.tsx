@@ -45,7 +45,19 @@ export const WelcomeScreen = ({
             value={formData.fullName}
             onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
             placeholder="e.g. John Doe"
-            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 outline-none transition-all text-sm"
+            className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none transition-all text-sm"
+            style={{ 
+              borderColor: 'var(--border-color, #e2e8f0)',
+              boxShadow: 'var(--focus-shadow, none)'
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = 'var(--theme-color)';
+              e.currentTarget.style.boxShadow = '0 0 0 4px var(--theme-color-ring)';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = '#e2e8f0';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
           />
         </div>
         <div>
@@ -58,11 +70,24 @@ export const WelcomeScreen = ({
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             placeholder="e.g. 0412 345 678"
-            className={`w-full px-4 py-3 rounded-xl border ${
-              errors.phone
-                ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                : "border-slate-200 focus:border-sky-500 focus:ring-sky-100"
-            } outline-none transition-all text-sm`}
+            className={`w-full px-4 py-3 rounded-xl border outline-none transition-all text-sm`}
+            style={{ 
+              borderColor: errors.phone ? '#f87171' : '#e2e8f0',
+              boxShadow: 'none'
+            }}
+            onFocus={(e) => {
+              if (!errors.phone) {
+                e.currentTarget.style.borderColor = 'var(--theme-color)';
+                e.currentTarget.style.boxShadow = '0 0 0 4px var(--theme-color-ring)';
+              } else {
+                e.currentTarget.style.borderColor = '#ef4444';
+                e.currentTarget.style.boxShadow = '0 0 0 4px rgba(239, 68, 68, 0.1)';
+              }
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = errors.phone ? '#f87171' : '#e2e8f0';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
           />
           {errors.phone && (
             <p className="text-red-500 text-[10px] mt-1 ml-1 font-medium">{errors.phone}</p>
@@ -80,11 +105,24 @@ export const WelcomeScreen = ({
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             placeholder="e.g. john@example.com"
-            className={`w-full px-4 py-3 rounded-xl border ${
-              errors.email
-                ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                : "border-slate-200 focus:border-sky-500 focus:ring-sky-100"
-            } outline-none transition-all text-sm`}
+            className={`w-full px-4 py-3 rounded-xl border outline-none transition-all text-sm`}
+            style={{ 
+              borderColor: errors.email ? '#f87171' : '#e2e8f0',
+              boxShadow: 'none'
+            }}
+            onFocus={(e) => {
+              if (!errors.email) {
+                e.currentTarget.style.borderColor = 'var(--theme-color)';
+                e.currentTarget.style.boxShadow = '0 0 0 4px var(--theme-color-ring)';
+              } else {
+                e.currentTarget.style.borderColor = '#ef4444';
+                e.currentTarget.style.boxShadow = '0 0 0 4px rgba(239, 68, 68, 0.1)';
+              }
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = errors.email ? '#f87171' : '#e2e8f0';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
           />
           {errors.email && (
             <p className="text-red-500 text-[10px] mt-1 ml-1 font-medium">{errors.email}</p>
@@ -92,7 +130,13 @@ export const WelcomeScreen = ({
         </div>
         <button
           type="submit"
-          className="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-sky-100 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] mt-4"
+          className="w-full text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] mt-4 cursor-pointer"
+          style={{ 
+            backgroundColor: 'var(--theme-color)',
+            boxShadow: '0 10px 15px -3px var(--theme-color-ring)' 
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--theme-color-dark)'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--theme-color)'}
         >
           {isEditing ? "Continue" : "Start Chat"}
         </button>
