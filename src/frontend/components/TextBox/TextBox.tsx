@@ -32,7 +32,11 @@ const TextBox = ({ isOpen }: TextBoxProps) => {
   const [input, setInput] = useState("");
   const [showExitPopup, setShowExitPopup] = useState(false);
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
-  const [formData, setFormData] = useState({ fullName: "", phone: "", email: "" });
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState(() => {
+    const cached = localStorage.getItem("userData");
+    return cached ? JSON.parse(cached) : { fullName: "", phone: "", email: "" };
+  });
   const [errors, setErrors] = useState({ phone: "", email: "" });
 
   const handleStartChat = (e: React.FormEvent) => {
@@ -58,7 +62,9 @@ const TextBox = ({ isOpen }: TextBoxProps) => {
 
     setErrors(newErrors);
     if (isValid) {
+      localStorage.setItem("userData", JSON.stringify(formData));
       setIsFormSubmitted(true);
+      setIsEditing(false);
     }
   };
 
@@ -69,7 +75,8 @@ const TextBox = ({ isOpen }: TextBoxProps) => {
     setIsHideSend(false);
     setInput("");
     setIsFormSubmitted(false);
-    setFormData({ fullName: "", phone: "", email: "" });
+    const cached = localStorage.getItem("userData");
+    setFormData(cached ? JSON.parse(cached) : { fullName: "", phone: "", email: "" });
     setErrors({ phone: "", email: "" });
   }
 
@@ -118,6 +125,7 @@ const TextBox = ({ isOpen }: TextBoxProps) => {
     setIsHideSend(true);
     setShowExitPopup(false);
     setReadOnly(true);
+    setIsEditing(false);
   }
 
   // ensure that the conversation area sticks to the bottom
@@ -135,14 +143,20 @@ const TextBox = ({ isOpen }: TextBoxProps) => {
 
   return (
       <div className="w-full max-w-md bg-white text-black rounded-xl shadow-lg overflow-hidden relative">
-        <Banner onClose={() => setShowExitPopup(true)} readOnly={readOnly}/>
+        <Banner 
+          onEditDetails={() => setIsEditing(true)} 
+          onEndConversation={() => setShowExitPopup(true)} 
+          readOnly={readOnly} 
+          showMenu={isFormSubmitted && !isEditing}
+        />
 
-        {!isFormSubmitted ? (
+        {!isFormSubmitted || isEditing ? (
             <WelcomeScreen
                 formData={formData}
                 setFormData={setFormData}
                 errors={errors}
                 handleStartChat={handleStartChat}
+                isEditing={isEditing}
             />
         ) : (
             <>

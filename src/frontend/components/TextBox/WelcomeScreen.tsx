@@ -12,6 +12,7 @@ interface WelcomeScreenProps {
     email: string;
   };
   handleStartChat: (e: React.FormEvent) => void;
+  isEditing?: boolean;
 }
 
 export const WelcomeScreen = ({
@@ -19,12 +20,19 @@ export const WelcomeScreen = ({
   setFormData,
   errors,
   handleStartChat,
+  isEditing = false,
 }: WelcomeScreenProps) => {
   return (
     <div className="px-6 py-10 h-[500px] w-[350px] flex flex-col justify-center bg-white">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-slate-800 mb-2">Welcome!</h2>
-        <p className="text-slate-500 text-sm">Please enter your details to start chatting</p>
+        <h2 className="text-2xl font-bold text-slate-800 mb-2">
+          {isEditing ? "Edit details" : "Welcome!"}
+        </h2>
+        <p className="text-slate-500 text-sm">
+          {isEditing 
+            ? "Update your information below" 
+            : "Please enter your details to start chatting"}
+        </p>
       </div>
       <form onSubmit={handleStartChat} className="space-y-5">
         <div>
@@ -86,7 +94,7 @@ export const WelcomeScreen = ({
           type="submit"
           className="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-sky-100 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] mt-4"
         >
-          Start Chat
+          {isEditing ? "Continue" : "Start Chat"}
         </button>
       </form>
     </div>

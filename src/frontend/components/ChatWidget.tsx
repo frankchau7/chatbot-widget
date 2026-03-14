@@ -7,6 +7,20 @@ const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [hasBeenOpened, setHasBeenOpened] = useState(false);
   const [showGreeting, setShowGreeting] = useState(false);
+  const [userName] = useState<string | null>(() => {
+    try {
+      const cached = localStorage.getItem("userData");
+      if (cached) {
+        const data = JSON.parse(cached);
+        if (data && typeof data.fullName === 'string' && data.fullName.trim()) {
+          return data.fullName.trim().split(" ")[0]; // Use first name
+        }
+      }
+    } catch (error) {
+      console.error("Error parsing userData from localStorage:", error);
+    }
+    return null;
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -33,7 +47,10 @@ const ChatWidget = () => {
       )}
 
       {!isOpen && showGreeting && (
-        <GreetingNotification onClose={() => setShowGreeting(false)} />
+        <GreetingNotification 
+          name={userName}
+          onClose={() => setShowGreeting(false)} 
+        />
       )}
 
       <div
