@@ -6,7 +6,6 @@ const openai = new OpenAI({
   baseURL: "http://localhost:11434/v1", // Your local Ollama
 });
 
-//TODO: need to figure out about the sessions, might need to get from cache
 const systemPrompt = `You are Melbourne Dental Bot at 25 Highbury Rd, Glen Waverley. Checkups $150, cleans $120, emergencies $250. Mon-Fri 9-5. 
 Keep replies to 50 words or less, friendly like reception staff. 
 Off-topic? "Sorry, I handle dental bookings only! What service can I help with?" Always offer to book.`;

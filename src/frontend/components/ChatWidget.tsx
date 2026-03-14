@@ -4,6 +4,7 @@ import TextBox from "./TextBox/TextBox";
 
 const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [hasBeenOpened, setHasBeenOpened] = useState(false);
   const [showGreeting, setShowGreeting] = useState(false);
 
   useEffect(() => {
@@ -16,6 +17,7 @@ const ChatWidget = () => {
 
   const handleClick = () => {
     setIsOpen(!isOpen);
+    setHasBeenOpened(true);
     if (!isOpen) {
       setShowGreeting(false);
     }
@@ -23,9 +25,9 @@ const ChatWidget = () => {
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
-      {isOpen && (
-        <div className="mb-1">
-          <TextBox />
+      {hasBeenOpened && (
+        <div className={`mb-1 ${isOpen ? "block" : "hidden"}`}>
+          <TextBox isOpen={isOpen} />
         </div>
       )}
 

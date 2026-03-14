@@ -19,7 +19,11 @@ const initialMessage: Message = {
   timestamp: new Date(),
 };
 
-const TextBox = () => {
+interface TextBoxProps {
+  isOpen: boolean;
+}
+
+const TextBox = ({ isOpen }: TextBoxProps) => {
   const [sendMessage] = useMutation<SendMessageData>(SEND_MESSAGE_MUTATION);
   const [sessionId, setSessionId] = useState(() => crypto.randomUUID());
   const [messages, setMessages] = useState<Message[]>([initialMessage]);
@@ -94,7 +98,7 @@ const TextBox = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isHideSend, scrollToBottom, readOnly]);
+  }, [messages, isHideSend, scrollToBottom, readOnly, isOpen]);
 
   return (
       <div className="w-full max-w-md bg-white text-black rounded-xl shadow-lg overflow-hidden relative">
