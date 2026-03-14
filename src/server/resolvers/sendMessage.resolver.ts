@@ -56,14 +56,25 @@ export const sendMessageResolvers = {
         };
       });
 
-      const completion = await openai.chat.completions.create({
-        model: "phi3:mini",
-        messages,
-      });
+      let reply: string;
+      try {
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("Timeout")), 3 * 60 * 1000)
+        );
 
-      const reply =
-        completion.choices[0].message.content ||
-        "Sorry was not able to process the message. Please try again!";
+        const completionPromise = openai.chat.completions.create({
+          model: "phi3:mini",
+          messages,
+        });
+
+        const completion = await Promise.race([completionPromise, timeoutPromise]) as OpenAI.Chat.Completions.ChatCompletion;
+        
+        reply = completion.choices[0].message.content || 
+                "Sorry was not able to process the message. Please try again!";
+      } catch (error) {
+        console.error("Error in sendMessage resolver:", error);
+        reply = "Sorry was not able to process the message. Please try again!";
+      }
 
       const assistantTime = new Date();
 

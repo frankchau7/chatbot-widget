@@ -65,6 +65,13 @@ const TextBox = () => {
       }
     } catch (error) {
       console.error("Error sending message:", error);
+      // Add the error message to the chat locally if the server fails
+      const errorMessage: Message = {
+        content: "Sorry was not able to process the message. Please try again!",
+        sender: "assistant",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsHideSend(false);
     }
