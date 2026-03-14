@@ -1,13 +1,13 @@
-import {useCallback, useEffect, useRef, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import type {Message, Session} from "../../types";
 import {SEND_MESSAGE_MUTATION} from "./mutations";
 import {useMutation} from "@apollo/client/react";
-import {BotMessage} from "../Message/BotMessage";
-import {UserMessage} from "../Message/UserMessage";
-import {TypingIndicator} from "../Message/TypingIndicator";
 import {TextInput} from "./TextInput";
 import {Banner} from "./Banner";
 import {Popup} from "./Popup.tsx";
+import {WelcomeScreen} from "./WelcomeScreen";
+import {MessageList} from "./MessageList";
+import {NewChatButton} from "./NewChatButton";
 
 interface SendMessageData {
   sendMessage: Session;
@@ -31,6 +31,36 @@ const TextBox = ({ isOpen }: TextBoxProps) => {
   const [readOnly, setReadOnly] = useState(false);
   const [input, setInput] = useState("");
   const [showExitPopup, setShowExitPopup] = useState(false);
+  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  const [formData, setFormData] = useState({ fullName: "", phone: "", email: "" });
+  const [errors, setErrors] = useState({ phone: "", email: "" });
+
+  const handleStartChat = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.fullName.trim()) return;
+
+    let isValid = true;
+    const newErrors = { phone: "", email: "" };
+
+    const cleanPhone = formData.phone.replace(/\D/g, "");
+    if (cleanPhone.length !== 10) {
+      newErrors.phone = "Phone number must be exactly 10 digits";
+      isValid = false;
+    }
+
+    if (formData.email.trim() !== "") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email.trim())) {
+        newErrors.email = "Please enter a valid email address";
+        isValid = false;
+      }
+    }
+
+    setErrors(newErrors);
+    if (isValid) {
+      setIsFormSubmitted(true);
+    }
+  };
 
   const handleStartNewChat = () => {
     setSessionId(crypto.randomUUID());
@@ -38,6 +68,9 @@ const TextBox = ({ isOpen }: TextBoxProps) => {
     setReadOnly(false);
     setIsHideSend(false);
     setInput("");
+    setIsFormSubmitted(false);
+    setFormData({ fullName: "", phone: "", email: "" });
+    setErrors({ phone: "", email: "" });
   }
 
   const handleMessageSend = async () => {
@@ -104,48 +137,32 @@ const TextBox = ({ isOpen }: TextBoxProps) => {
       <div className="w-full max-w-md bg-white text-black rounded-xl shadow-lg overflow-hidden relative">
         <Banner onClose={() => setShowExitPopup(true)} readOnly={readOnly}/>
 
-        {/* Conversation area */}
-        <div
-            ref={messagesContainerRef}
-            className="px-4 py-3 h-[500px] w-[350px] overflow-y-auto space-y-4 bg-white text-left"
-            style={{scrollBehavior: 'smooth'}}
-        >
-          {messages.map((message) => {
-            const time =
-                message.timestamp instanceof Date
-                    ? message.timestamp
-                    : new Date(message.timestamp);
-            const timeLabel = time.toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            });
-
-            const isBot = message.sender === "assistant";
-
-            if (isBot) {
-              return <BotMessage message={message} timeLabel={timeLabel}/>;
-            }
-
-            return <UserMessage message={message} timeLabel={timeLabel}/>;
-          })}
-          {isHideSend && !readOnly && <TypingIndicator/>}
-        </div>
-
-        {readOnly ? (
-            <div className="px-4 py-3 border-t border-slate-200 bg-white flex justify-center">
-              <button
-                  onClick={handleStartNewChat}
-                  className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-6 rounded-full shadow-md transition-all duration-200 transform hover:scale-105 active:scale-95 text-sm"
-              >
-                Start new chat
-              </button>
-            </div>
-        ) : !isHideSend && (
-            <TextInput
-                input={input}
-                setInput={setInput}
-                handleMessageSend={handleMessageSend}
+        {!isFormSubmitted ? (
+            <WelcomeScreen
+                formData={formData}
+                setFormData={setFormData}
+                errors={errors}
+                handleStartChat={handleStartChat}
             />
+        ) : (
+            <>
+              <MessageList
+                  messages={messages}
+                  isHideSend={isHideSend}
+                  readOnly={readOnly}
+                  messagesContainerRef={messagesContainerRef}
+              />
+
+              {readOnly ? (
+                  <NewChatButton handleStartNewChat={handleStartNewChat}/>
+              ) : !isHideSend && (
+                  <TextInput
+                      input={input}
+                      setInput={setInput}
+                      handleMessageSend={handleMessageSend}
+                  />
+              )}
+            </>
         )}
 
         {showExitPopup && (
