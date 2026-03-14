@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import type { Message, MessageDTO, Session } from "../types";
+import type { Session } from "../types";
 
 const openai = new OpenAI({
   apiKey: "ollama",
@@ -43,7 +43,6 @@ export const sendMessageResolvers = {
       }
 
       // Handle user message
-      // TODO: check if we need id
       session.messages.push({
         content: message,
         sender: "user",
