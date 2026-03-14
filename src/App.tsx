@@ -2,6 +2,7 @@ import './App.css'
 import ChatWidget from '../src/frontend/components/ChatWidget'
 import {ServiceBox} from "./frontend/components/ServiceBox.tsx";
 import AboutUs from './frontend/pages/AboutUs.tsx';
+import BookNow from './frontend/pages/BookNow.tsx';
 import { BrowserRouter as Router, Routes, Route, NavLink, Link } from 'react-router-dom';
 
 const Home = () => (
@@ -93,6 +94,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<AboutUs />} />
+          <Route path="/book-now" element={<BookNow />} />
         </Routes>
 
         <ChatWidget />

@@ -55,7 +55,7 @@ button {
 
 button[class*="rounded-full"] {
   border-radius: 9999px;
-  padding: 0;
+  padding: revert;
 }
 button:hover {
   border-color: #646cff;

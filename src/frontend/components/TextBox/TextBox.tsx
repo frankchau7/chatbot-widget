@@ -2,6 +2,7 @@ import React, {useCallback, useEffect, useRef, useState} from "react";
 import type {Message, Session} from "../../types";
 import {SEND_MESSAGE_MUTATION} from "./mutations";
 import {useMutation} from "@apollo/client/react";
+import {useNavigate} from "react-router-dom";
 import {TextInput} from "./TextInput";
 import {Banner} from "./Banner";
 import {Popup} from "./Popup.tsx";
@@ -24,6 +25,7 @@ interface TextBoxProps {
 }
 
 const TextBox = ({ isOpen }: TextBoxProps) => {
+  const navigate = useNavigate();
   const [sendMessage] = useMutation<SendMessageData>(SEND_MESSAGE_MUTATION);
   const [sessionId, setSessionId] = useState(() => crypto.randomUUID());
   const [messages, setMessages] = useState<Message[]>([initialMessage]);
@@ -79,6 +81,10 @@ const TextBox = ({ isOpen }: TextBoxProps) => {
     setFormData(cached ? JSON.parse(cached) : { fullName: "", phone: "", email: "" });
     setErrors({ phone: "", email: "" });
   }
+
+  const handleBookAppointment = () => {
+    navigate("/book-now");
+  };
 
   const handleMessageSend = async () => {
     const trimmed = input.trim();
@@ -170,11 +176,21 @@ const TextBox = ({ isOpen }: TextBoxProps) => {
               {readOnly ? (
                   <NewChatButton handleStartNewChat={handleStartNewChat}/>
               ) : !isHideSend && (
-                  <TextInput
-                      input={input}
-                      setInput={setInput}
-                      handleMessageSend={handleMessageSend}
-                  />
+                  <div className="relative">
+                    <div className="absolute -top-14 left-1/2 -translate-x-1/2 z-10">
+                      <button
+                        onClick={handleBookAppointment}
+                        className="bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-semibold py-3 px-8 rounded-full shadow-md transition-all duration-200 cursor-pointer whitespace-nowrap"
+                      >
+                        Book Appointment
+                      </button>
+                    </div>
+                    <TextInput
+                        input={input}
+                        setInput={setInput}
+                        handleMessageSend={handleMessageSend}
+                    />
+                  </div>
               )}
             </>
         )}

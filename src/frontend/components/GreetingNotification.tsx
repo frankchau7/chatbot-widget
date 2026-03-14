@@ -19,7 +19,8 @@ const GreetingNotification = ({ name, onClose }: GreetingNotificationProps) => {
       </div>
       <button 
         onClick={onClose}
-        className="absolute -top-2 -right-2 bg-slate-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] hover:bg-slate-700 shadow-md border border-white cursor-pointer transition-colors p-0 shrink-0 aspect-square"
+        className="absolute -top-2 -right-2 bg-slate-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] hover:bg-slate-700 shadow-md border border-white cursor-pointer transition-colors shrink-0 aspect-square"
+        style={{ padding: 0 }}
         aria-label="Close greeting"
       >
         ✕

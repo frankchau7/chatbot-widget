@@ -62,7 +62,7 @@ export const sendMessageResolvers = {
         );
 
         const completionPromise = openai.chat.completions.create({
-          model: "phi3:mini",
+          model: "qwen3:8b",
           messages,
         });
 

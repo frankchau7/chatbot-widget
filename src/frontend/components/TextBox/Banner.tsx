@@ -42,8 +42,8 @@ export const Banner = ({ onEditDetails, onEndConversation, readOnly, showMenu = 
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="text-white/80 hover:text-white transition-colors p-0 w-8 h-8 flex items-center justify-center rounded-full shrink-0 aspect-square cursor-pointer"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+            className="text-white/80 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full shrink-0 aspect-square cursor-pointer"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', padding: 0 }}
             aria-label="Menu"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
