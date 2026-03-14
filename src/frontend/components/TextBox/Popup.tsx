@@ -11,13 +11,13 @@ export const Popup = ({setShowExitPopup, handleEndConversation, children}: Popup
             <div className="flex gap-3 justify-center">
                 <button
                     onClick={() => setShowExitPopup(false)}
-                    className="px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg transition-colors"
+                    className="px-4 py-2 text-sm font-semibold text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors cursor-pointer"
                 >
                     No
                 </button>
                 <button
                     onClick={handleEndConversation}
-                    className="px-4 py-2 text-sm font-semibold text-slate-800 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg shadow-sm transition-colors"
+                    className="px-4 py-2 text-sm font-semibold text-red-600 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors cursor-pointer"
                 >
                     Yes
                 </button>
