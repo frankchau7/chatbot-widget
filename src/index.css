@@ -47,6 +47,11 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
+button[class*="rounded-full"] {
+  border-radius: 9999px;
+  padding: 0;
+}
 button:hover {
   border-color: #646cff;
 }

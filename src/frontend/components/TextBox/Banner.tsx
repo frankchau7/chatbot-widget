@@ -25,7 +25,7 @@ export const Banner = ({onClose, readOnly}: BannerProps) => {
         {!readOnly && (
             <button
                 onClick={onClose}
-                className="text-slate-400 hover:text-slate-600 transition-colors p-1 bg-slate-100 rounded-full"
+                className="text-slate-400 hover:text-slate-600 transition-colors p-0 w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full shrink-0 aspect-square"
                 aria-label="Close chat"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"

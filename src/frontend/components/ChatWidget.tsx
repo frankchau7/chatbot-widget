@@ -27,7 +27,7 @@ const ChatWidget = () => {
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
       {hasBeenOpened && (
-        <div className={`mb-1 ${isOpen ? "block" : "hidden"}`}>
+        <div className={`relative z-10 mb-1 ${isOpen ? "block" : "hidden"}`}>
           <TextBox isOpen={isOpen} />
         </div>
       )}
@@ -45,7 +45,7 @@ const ChatWidget = () => {
         <img
           src={botAvatar}
           alt="Chatbot avatar"
-          className="h-12 w-12 rounded-full object-cover"
+          className="h-15 w-15 rounded-full object-cover"
         />
       </div>
     </div>
