@@ -21,12 +21,20 @@ const initialMessage: Message = {
 
 const TextBox = () => {
   const [sendMessage] = useMutation<SendMessageData>(SEND_MESSAGE_MUTATION);
-  const [sessionId] = useState(() => crypto.randomUUID());
+  const [sessionId, setSessionId] = useState(() => crypto.randomUUID());
   const [messages, setMessages] = useState<Message[]>([initialMessage]);
   const [isHideSend, setIsHideSend] = useState(false);
   const [readOnly, setReadOnly] = useState(false);
   const [input, setInput] = useState("");
   const [showExitPopup, setShowExitPopup] = useState(false);
+
+  const handleStartNewChat = () => {
+    setSessionId(crypto.randomUUID());
+    setMessages([initialMessage]);
+    setReadOnly(false);
+    setIsHideSend(false);
+    setInput("");
+  }
 
   const handleMessageSend = async () => {
     const trimmed = input.trim();
@@ -79,7 +87,7 @@ const TextBox = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isHideSend, scrollToBottom]);
+  }, [messages, isHideSend, scrollToBottom, readOnly]);
 
   return (
       <div className="w-full max-w-md bg-white text-black rounded-xl shadow-lg overflow-hidden relative">
@@ -112,7 +120,16 @@ const TextBox = () => {
           {isHideSend && !readOnly && <TypingIndicator/>}
         </div>
 
-        {!isHideSend && (
+        {readOnly ? (
+            <div className="px-4 py-3 border-t border-slate-200 bg-white flex justify-center">
+              <button
+                  onClick={handleStartNewChat}
+                  className="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-6 rounded-full shadow-md transition-all duration-200 transform hover:scale-105 active:scale-95 text-sm"
+              >
+                Start new chat
+              </button>
+            </div>
+        ) : !isHideSend && (
             <TextInput
                 input={input}
                 setInput={setInput}
