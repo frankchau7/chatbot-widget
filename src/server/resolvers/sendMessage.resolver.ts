@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import type { Session } from "../types";
+import { chatWithRAG } from "../lib/rag";
 
 const openai = new OpenAI({
   apiKey: "ollama",
@@ -48,31 +49,37 @@ export const sendMessageResolvers = {
         timestamp: now.toISOString(),
       });
 
-      const messages = session.messages.map((message) => {
-        return {
-          role: message.sender,
-          content: message.content,
-        };
-      });
-
       let reply: string;
       try {
-        const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error("Timeout")), 3 * 60 * 1000)
-        );
-
-        const completionPromise = openai.chat.completions.create({
-          model: "qwen3:8b",
-          messages,
-        });
-
-        const completion = await Promise.race([completionPromise, timeoutPromise]) as OpenAI.Chat.Completions.ChatCompletion;
+        // Use RAG instead of direct OpenAI call
+        reply = await chatWithRAG(message);
         
-        reply = completion.choices[0].message.content || 
-                "Sorry was not able to process the message. Please try again!";
+        if (!reply) {
+          reply = "Sorry was not able to process the message. Please try again!";
+        }
       } catch (error) {
-        console.error("Error in sendMessage resolver:", error);
-        reply = "Sorry was not able to process the message. Please try again!";
+        console.error("Error in sendMessage resolver (RAG):", error);
+        
+        // Fallback to direct OpenAI if RAG fails (e.g. Chroma or Ollama not running)
+        try {
+          const messages = session.messages.map((message) => {
+            return {
+              role: message.sender,
+              content: message.content,
+            };
+          });
+
+          const completion = await openai.chat.completions.create({
+            model: "qwen3:8b",
+            messages: messages as OpenAI.Chat.ChatCompletionMessageParam[],
+          });
+          
+          reply = completion.choices[0].message.content || 
+                  "Sorry was not able to process the message. Please try again!";
+        } catch (fallbackError) {
+          console.error("Error in sendMessage resolver (Fallback):", fallbackError);
+          reply = "Sorry was not able to process the message. Please try again!";
+        }
       }
 
       const assistantTime = new Date();

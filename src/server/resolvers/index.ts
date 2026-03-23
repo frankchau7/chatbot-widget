@@ -1,4 +1,4 @@
-import { sendMessageResolvers } from "./sendMessage.resolver";
+import { sendMessageResolvers } from "./sendMessage.resolver.js";
 
 export const resolvers = {
   Query: {

@@ -1,4 +1,4 @@
-import { sendMessageTypeDefs } from "./sendMessage.schema";
+import { sendMessageTypeDefs } from "./sendMessage.schema.js";
 
 export const typeDefs = [sendMessageTypeDefs];
 
