@@ -6,6 +6,7 @@ import { ChatOllama } from "@langchain/ollama";
 import { createStuffDocumentsChain } from "@langchain/classic/chains/combine_documents";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { Document } from "@langchain/core/documents";
+import {ChromaClient} from "chromadb";
 
 const CHROMA_URL = process.env.CHROMA_URL || "http://localhost:8000";
 const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
@@ -20,10 +21,10 @@ export async function scrapeWebsite(url: string, browser?: Browser): Promise<{ t
       shouldClose = true;
     }
     page = await internalBrowser.newPage();
-    
+
     // Set a reasonable navigation timeout
     await page.goto(url, { waitUntil: "networkidle", timeout: 30000 });
-    
+
     // Extract text and clean it, also get links
     const data = await page.evaluate(() => {
       const links = Array.from(document.querySelectorAll("a"))
@@ -39,13 +40,13 @@ export async function scrapeWebsite(url: string, browser?: Browser): Promise<{ t
       // Remove noise elements
       const noise = document.querySelectorAll("script, style, nav, footer, header, noscript, iframe");
       noise.forEach(s => s.remove());
-      
+
       return {
         text: document.body.innerText,
         links: links
       };
     });
-    
+
     return {
       text: data.text.replace(/\s+/g, " ").trim(),
       links: data.links
@@ -75,12 +76,12 @@ export async function scrapeWebsite(url: string, browser?: Browser): Promise<{ t
   }
 }
 
-export async function crawlWebsite(rootUrl: string, maxPages: number = 20): Promise<Document[]> {
+export async function crawlWebsite(rootUrl: string, maxPages: number = 25): Promise<Document[]> {
   const visited = new Set<string>();
   const toVisit = [rootUrl];
   const allDocs: Document[] = [];
   let domain: string;
-  
+
   try {
     domain = new URL(rootUrl).hostname;
   } catch {
@@ -95,11 +96,11 @@ export async function crawlWebsite(rootUrl: string, maxPages: number = 20): Prom
     console.error("Failed to launch browser for crawling:", error);
     return [];
   }
-  
+
   try {
     while (toVisit.length > 0 && visited.size < maxPages) {
       const url = toVisit.shift()!;
-      
+
       let normalizedUrl;
       try {
         // Normalize URL (remove hash and trailing slash)
@@ -107,23 +108,23 @@ export async function crawlWebsite(rootUrl: string, maxPages: number = 20): Prom
       } catch {
         continue;
       }
-      
+
       if (visited.has(normalizedUrl)) continue;
       visited.add(normalizedUrl);
-      
+
       console.log(`Crawling (${visited.size}/${maxPages}): ${normalizedUrl}`);
       try {
         const { text, links } = await scrapeWebsite(normalizedUrl, browser);
-        
+
         if (text) {
-          const splitter = new RecursiveCharacterTextSplitter({ 
+          const splitter = new RecursiveCharacterTextSplitter({
             chunkSize: 1000,
-            chunkOverlap: 200 
+            chunkOverlap: 200
           });
           const chunks = await splitter.splitText(text);
-          const docs = chunks.map(chunk => new Document({ 
-            pageContent: chunk, 
-            metadata: { source: normalizedUrl } 
+          const docs = chunks.map(chunk => new Document({
+            pageContent: chunk,
+            metadata: { source: normalizedUrl }
           }));
           allDocs.push(...docs);
         }
@@ -156,32 +157,73 @@ export async function crawlWebsite(rootUrl: string, maxPages: number = 20): Prom
       }
     }
   }
-  
+
   return allDocs;
 }
 
 export async function setupRAG(websiteUrl: string) {
   try {
     console.log(`Starting crawl of ${websiteUrl}...`);
+    const client: ChromaClient = new ChromaClient({path: CHROMA_URL});
+    const embeddings = new OllamaEmbeddings({
+      model: "nomic-embed-text",
+      baseUrl: OLLAMA_BASE_URL
+    });
+
+    try {
+      const clinicCol = await client.getCollection({name: "clinic"});
+
+      if (clinicCol?.metadata?.lastUpdated) {
+        const lastUpdated = new Date(clinicCol.metadata.lastUpdated as string);
+        const now = new Date();
+        const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+
+        if (lastUpdated >= threeMonthsAgo) {
+          console.log(`✅ RAG storage is fresh (last updated: ${lastUpdated.toISOString()}). Skipping crawl.`);
+          return;
+        }
+
+        console.log(`⏳ RAG storage is stale (last updated: ${lastUpdated.toISOString()}). Re-crawling...`);
+      }
+
+      // Collection exists but is stale or has no lastUpdated — delete it
+      await client.deleteCollection({name: "clinic"});
+    } catch {
+      // Collection doesn't exist yet
+      console.log("🆕 No existing RAG storage found. Crawling for the first time...");
+    }
+
     const docs = await crawlWebsite(websiteUrl);
-    
+
     if (docs.length === 0) {
       console.warn("No documents found during crawl. RAG might not have any context.");
       return;
     }
-    
+
     console.log(`Crawl complete. Found ${docs.length} document chunks from across the site.`);
-    
+
     console.log("Initialising embeddings and vector store...");
-    const embeddings = new OllamaEmbeddings({ 
-      model: "nomic-embed-text",
-      baseUrl: OLLAMA_BASE_URL
+    const texts = docs.map(d => d.pageContent);
+    const docEmbeddings = await embeddings.embedDocuments(texts);
+    const ids = docs.map((_, i) => `clinic_doc_${Date.now()}_${i}`);
+    const now = new Date().toISOString();
+
+    const collection = await client.getOrCreateCollection({
+      name: "clinic",
+      metadata: { lastUpdated: now }
     });
-    
-    await Chroma.fromDocuments(docs, embeddings, { 
-      collectionName: "clinic",
-      url: CHROMA_URL
+
+    await collection.add({
+      ids,
+      embeddings: docEmbeddings,
+      documents: texts,
+      metadatas: docs.map(d => ({
+        ...d.metadata,
+        lastUpdated: now,
+        chunkIndex: d.metadata?.chunkIndex || 0
+      }))
     });
+
     console.log("✅ RAG storage setup complete.");
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -192,19 +234,19 @@ export async function setupRAG(websiteUrl: string) {
 
 export async function chatWithRAG(question: string) {
   try {
-    const embeddings = new OllamaEmbeddings({ 
+    const embeddings = new OllamaEmbeddings({
       model: "nomic-embed-text",
       baseUrl: OLLAMA_BASE_URL
     });
 
-    const vectorStore = await Chroma.fromExistingCollection(embeddings, { 
+    const vectorStore = await Chroma.fromExistingCollection(embeddings, {
       collectionName: "clinic",
       url: CHROMA_URL
     });
-    
+
     const retriever = vectorStore.asRetriever();
-    
-    const llm = new ChatOllama({ 
+
+    const llm = new ChatOllama({
       model: "qwen3:8b",
       baseUrl: OLLAMA_BASE_URL
     });
@@ -219,18 +261,18 @@ export async function chatWithRAG(question: string) {
       Question: {question}
     `);
 
-    const chain = await createStuffDocumentsChain({ 
-      llm, 
-      prompt 
+    const chain = await createStuffDocumentsChain({
+      llm,
+      prompt
     });
-    
+
     const context = await retriever.invoke(question);
-    
+
     if (!context || context.length === 0) {
       console.warn("No relevant context found in vector store for the question.");
     }
-    
-    return await chain.invoke({ 
+
+    return await chain.invoke({
       question,
       context
     });
