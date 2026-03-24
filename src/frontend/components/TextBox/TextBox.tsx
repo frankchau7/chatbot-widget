@@ -182,7 +182,7 @@ const TextBox = ({ isOpen }: TextBoxProps) => {
                         onClick={handleBookAppointment}
                         className="bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-semibold py-3 px-8 rounded-full shadow-md transition-all duration-200 cursor-pointer whitespace-nowrap"
                       >
-                        Book Appointment
+                        Book Now
                       </button>
                     </div>
                     <TextInput

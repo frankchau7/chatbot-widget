@@ -1,15 +1,16 @@
-import { chromium, type Browser } from "playwright";
-import { OllamaEmbeddings } from "@langchain/ollama";
-import { Chroma } from "@langchain/community/vectorstores/chroma";
-import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
-import { ChatOllama } from "@langchain/ollama";
-import { createStuffDocumentsChain } from "@langchain/classic/chains/combine_documents";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { Document } from "@langchain/core/documents";
+import {type Browser, chromium} from "playwright";
+import {ChatOllama, OllamaEmbeddings} from "@langchain/ollama";
+import {Chroma} from "@langchain/community/vectorstores/chroma";
+import {RecursiveCharacterTextSplitter} from "@langchain/textsplitters";
+import {createStuffDocumentsChain} from "@langchain/classic/chains/combine_documents";
+import {ChatPromptTemplate} from "@langchain/core/prompts";
+import {Document} from "@langchain/core/documents";
 import {ChromaClient} from "chromadb";
+import {formatWebsiteUrlToCompanyName} from "../utils";
 
 const CHROMA_URL = process.env.CHROMA_URL || "http://localhost:8000";
 const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
+const CLINIC_URL = process.env.CLINIC_URL || "https://claytondentalclinic.com.au/";
 
 export async function scrapeWebsite(url: string, browser?: Browser): Promise<{ text: string, links: string[] }> {
   let internalBrowser = browser;
@@ -76,9 +77,26 @@ export async function scrapeWebsite(url: string, browser?: Browser): Promise<{ t
   }
 }
 
-export async function crawlWebsite(rootUrl: string, maxPages: number = 25): Promise<Document[]> {
+/**
+ * Normalizes a URL by removing any fragment identifier and trailing slashes.
+ * @param url the link to the website it is crawling
+ */
+export function normalizeUrl(url: string): string {
+  return url
+    .replace(/^http:\/\//, "https://")
+    .split("#")[0]
+    .replace(/\/$/, "");
+}
+
+/**
+ * Crawls a website and extracts text and links.
+ * @param rootUrl the website it is crawling
+ * @param maxPages the maximum number of pages to crawl (default: 30)
+ */
+export async function crawlWebsite(rootUrl: string, maxPages: number = 30): Promise<Document[]> {
   const visited = new Set<string>();
-  const toVisit = [rootUrl];
+  const queued = new Set<string>([normalizeUrl(rootUrl)]);
+  const toVisit = [normalizeUrl(rootUrl)];
   const allDocs: Document[] = [];
   let domain: string;
 
@@ -99,15 +117,7 @@ export async function crawlWebsite(rootUrl: string, maxPages: number = 25): Prom
 
   try {
     while (toVisit.length > 0 && visited.size < maxPages) {
-      const url = toVisit.shift()!;
-
-      let normalizedUrl;
-      try {
-        // Normalize URL (remove hash and trailing slash)
-        normalizedUrl = url.split("#")[0].replace(/\/$/, "");
-      } catch {
-        continue;
-      }
+      const normalizedUrl = toVisit.shift()!;
 
       if (visited.has(normalizedUrl)) continue;
       visited.add(normalizedUrl);
@@ -133,9 +143,10 @@ export async function crawlWebsite(rootUrl: string, maxPages: number = 25): Prom
         for (const link of links) {
           try {
             const linkUrl = new URL(link);
-            const normalizedLink = link.split("#")[0].replace(/\/$/, "");
-            if (linkUrl.hostname === domain && !visited.has(normalizedLink) && !toVisit.includes(normalizedLink)) {
+            const normalizedLink = normalizeUrl(link);
+            if (linkUrl.hostname === domain && !visited.has(normalizedLink) && !queued.has(normalizedLink)) {
               toVisit.push(normalizedLink);
+              queued.add(normalizedLink);
             }
           } catch {
             // Skip invalid URLs silently
@@ -170,8 +181,10 @@ export async function setupRAG(websiteUrl: string) {
       baseUrl: OLLAMA_BASE_URL
     });
 
+    const clinicName = formatWebsiteUrlToCompanyName(websiteUrl);
+
     try {
-      const clinicCol = await client.getCollection({name: "clinic"});
+      const clinicCol = await client.getCollection({name: clinicName});
 
       if (clinicCol?.metadata?.lastUpdated) {
         const lastUpdated = new Date(clinicCol.metadata.lastUpdated as string);
@@ -187,7 +200,7 @@ export async function setupRAG(websiteUrl: string) {
       }
 
       // Collection exists but is stale or has no lastUpdated — delete it
-      await client.deleteCollection({name: "clinic"});
+      await client.deleteCollection({name: clinicName});
     } catch {
       // Collection doesn't exist yet
       console.log("🆕 No existing RAG storage found. Crawling for the first time...");
@@ -205,11 +218,11 @@ export async function setupRAG(websiteUrl: string) {
     console.log("Initialising embeddings and vector store...");
     const texts = docs.map(d => d.pageContent);
     const docEmbeddings = await embeddings.embedDocuments(texts);
-    const ids = docs.map((_, i) => `clinic_doc_${Date.now()}_${i}`);
+    const ids = docs.map((_, i) => `${clinicName}_doc_${Date.now()}_${i}`);
     const now = new Date().toISOString();
 
     const collection = await client.getOrCreateCollection({
-      name: "clinic",
+      name: clinicName,
       metadata: { lastUpdated: now }
     });
 
@@ -239,8 +252,10 @@ export async function chatWithRAG(question: string) {
       baseUrl: OLLAMA_BASE_URL
     });
 
+    const clinicName = formatWebsiteUrlToCompanyName(CLINIC_URL);
+
     const vectorStore = await Chroma.fromExistingCollection(embeddings, {
-      collectionName: "clinic",
+      collectionName: clinicName,
       url: CHROMA_URL
     });
 
@@ -252,12 +267,19 @@ export async function chatWithRAG(question: string) {
     });
 
     const prompt = ChatPromptTemplate.fromTemplate(`
-      You are an AI dental clinic receptionist for the company in the following context:
-      <context>
-      {context}
-      </context>
-      Keep replies to 100 words or less, friendly like reception staff. 
-      Off-topic? "Sorry, I handle dental bookings only! What service can I help with?" Always offer to book.
+      You are a dental clinic receptionist texting a patient. 
+      
+      Context: {context}
+      
+      **TEXT MESSAGE RULES** (follow exactly):
+      1. NO asterisks **bold** or formatting EVER  
+      2. NO "Hello!", "Hi!", intros - jump straight to answering
+      3. Casual text style like human receptionist: short sentences, normal punctuation
+      4. Casual prices: "$1000" not "**$1000**" 
+      5. End with booking offer only if relevant
+      
+      Keep under 150 words. Off-topic: "Sorry, I'm here to assist with questions about the dental clinic! What service can I help with?"
+      
       Question: {question}
     `);
 
