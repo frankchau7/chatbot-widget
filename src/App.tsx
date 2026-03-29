@@ -4,23 +4,30 @@ import {ServiceBox} from "./frontend/components/ServiceBox.tsx";
 import AboutUs from './frontend/pages/AboutUs.tsx';
 import BookNow from './frontend/pages/BookNow.tsx';
 import { BrowserRouter as Router, Routes, Route, NavLink, Link } from 'react-router-dom';
+import heroImage from './frontend/assets/dental-clinic.png';
 
 const Home = () => (
-  <main className="pt-24 pb-16 px-6 max-w-6xl mx-auto">
-    {/* Hero Section */}
-    <section className="text-center mb-16">
-      <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
-        FCXO Dental Open 7 Days
-      </h1>
-      <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-        Book a dentist in Melbourne with the best dentist
-      </p>
+  <main className="pb-16">
+    {/* Hero Section with Background Image */}
+    <section
+      className="relative w-full h-[70vh] min-h-[400px] flex items-center justify-center bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url(${heroImage})` }}
+    >
+      <div className="absolute inset-0 bg-black/50" />
+      <div className="relative z-10 text-center px-6">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4 tracking-tight drop-shadow-lg animate-slide-up">
+          FC Dentals Open 7 Days
+        </h1>
+        <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto drop-shadow-md animate-slide-up-delay">
+          Book a dentist in Melbourne with the best dentist! Definitely legit :D
+        </p>
+      </div>
     </section>
 
     {/* Services Section */}
-    <section id="services" className="space-y-12">
+    <section id="services" className="space-y-12 pt-16 px-6 max-w-6xl mx-auto">
       <h2 className="text-3xl font-bold text-center text-slate-800">
-        How can Doctor Vanessa Wong help you?
+        How can Doctor Frank Chau help you?
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -28,9 +35,9 @@ const Home = () => (
         <div className="bg-slate-50 rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col gap-6">
           <h3 className="text-xl font-bold text-purple-800 border-b border-purple-100 pb-2">General Dentistry</h3>
           <div className="space-y-4">
-            <ServiceBox content="Check-up and teeth cleaning" />
-            <ServiceBox content="Dental fillings" />
-            <ServiceBox content="Children's dentistry" />
+            <ServiceBox content="Check-up and Teeth Cleaning" />
+            <ServiceBox content="Dental Fillings" />
+            <ServiceBox content="Children's Dentistry" />
           </div>
         </div>
 
@@ -38,8 +45,8 @@ const Home = () => (
         <div className="bg-slate-50 rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col gap-6">
           <h3 className="text-xl font-bold text-purple-800 border-b border-purple-100 pb-2">Cosmetic Dentistry</h3>
           <div className="space-y-4">
-            <ServiceBox content="Teeth whitening" />
-            <ServiceBox content="dental veneers" />
+            <ServiceBox content="Teeth Whitening" />
+            <ServiceBox content="Dental Veneers" />
           </div>
         </div>
 
@@ -48,7 +55,7 @@ const Home = () => (
           <h3 className="text-xl font-bold text-purple-800 border-b border-purple-100 pb-2">Orthodontics</h3>
           <div className="space-y-4">
             <ServiceBox content="Invisalign" />
-            <ServiceBox content="Clearcorrect" />
+            <ServiceBox content="ClearCorrect" />
             <ServiceBox content="SureSmile" />
           </div>
         </div>
@@ -67,7 +74,7 @@ function App() {
             to="/"
             className="text-xl font-bold text-purple-700 hover:opacity-80 transition-opacity"
           >
-            FCXO Dental
+            FC Dentals
           </Link>
           <nav className="absolute left-1/2 -translate-x-1/2 flex gap-8 items-center h-full">
             <NavLink 

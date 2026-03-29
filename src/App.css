@@ -13,6 +13,27 @@
   animation: bounce-slow 3s infinite;
 }
 
+@keyframes slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-slide-up-delay {
+  animation: slide-up 0.8s ease-out 0.2s forwards;
+  opacity: 0;
+}
+
 #root {
   width: 100%;
 }
