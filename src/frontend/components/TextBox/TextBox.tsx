@@ -22,9 +22,10 @@ const initialMessage: Message = {
 
 interface TextBoxProps {
   isOpen: boolean;
+  onClose: () => void;
 }
 
-const TextBox = ({ isOpen }: TextBoxProps) => {
+const TextBox = ({ isOpen, onClose }: TextBoxProps) => {
   const navigate = useNavigate();
   const [sendMessage] = useMutation<SendMessageData>(SEND_MESSAGE_MUTATION);
   const [sessionId, setSessionId] = useState(() => crypto.randomUUID());
@@ -152,6 +153,7 @@ const TextBox = ({ isOpen }: TextBoxProps) => {
         <Banner 
           onEditDetails={() => setIsEditing(true)} 
           onEndConversation={() => setShowExitPopup(true)} 
+          onClose={onClose}
           readOnly={readOnly} 
           showMenu={isFormSubmitted && !isEditing}
         />

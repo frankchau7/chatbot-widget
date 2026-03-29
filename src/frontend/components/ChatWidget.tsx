@@ -42,7 +42,7 @@ const ChatWidget = () => {
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
       {hasBeenOpened && (
         <div className={`relative z-10 mb-1 ${isOpen ? "block" : "hidden"}`}>
-          <TextBox isOpen={isOpen} />
+          <TextBox isOpen={isOpen} onClose={handleClick} />
         </div>
       )}
 

@@ -4,11 +4,12 @@ import botAvatar from "../../assets/bot_avatar.jpg";
 interface BannerProps {
   onEditDetails: () => void;
   onEndConversation: () => void;
+  onClose: () => void;
   readOnly: boolean;
   showMenu?: boolean;
 }
 
-export const Banner = ({ onEditDetails, onEndConversation, readOnly, showMenu = true }: BannerProps) => {
+export const Banner = ({ onEditDetails, onEndConversation, onClose, readOnly, showMenu = true }: BannerProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -24,6 +25,17 @@ export const Banner = ({ onEditDetails, onEndConversation, readOnly, showMenu = 
 
   return (
     <div className="relative flex items-center justify-between px-4 h-16 border-b shadow-sm" style={{ backgroundColor: 'var(--theme-color)', borderColor: 'var(--theme-color-dark)' }}>
+      <button
+        onClick={onClose}
+        className="text-white/80 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full shrink-0 aspect-square cursor-pointer z-10"
+        style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', padding: 0 }}
+        aria-label="Close chat"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
       <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
           <img
