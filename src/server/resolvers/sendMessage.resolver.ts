@@ -2,9 +2,11 @@ import OpenAI from "openai";
 import type { Session } from "../types";
 import { chatWithRAG } from "../lib/rag";
 
+const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
+
 const openai = new OpenAI({
   apiKey: "ollama",
-  baseURL: "http://localhost:11434/v1", // Your local Ollama
+  baseURL: `${OLLAMA_BASE_URL}/v1`,
 });
 
 const systemPrompt = `You are Melbourne Dental Bot at 25 Highbury Rd, Glen Waverley. Checkups $150, cleans $120, emergencies $250. Mon-Fri 9-5. 

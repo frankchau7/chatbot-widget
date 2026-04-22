@@ -12,7 +12,7 @@ async function startServer() {
 
   // Initialize RAG with the clinic's website
   // In a real app, this might be triggered by an admin or on a schedule
-  const CLINIC_URL = process.env.CLINIC_URL || "https://claytondentalclinic.com.au/"; // Example URL
+  const CLINIC_URL = process.env.CLINIC_URL || "https://claytondentalclinic.com.au/";
   console.log(`Initializing RAG for ${CLINIC_URL}...`);
   setupRAG(CLINIC_URL).then(() => {
     console.log("✅ RAG initialized successfully");
@@ -35,7 +35,7 @@ async function startServer() {
     expressMiddleware(server),
   );
 
-  const port = 4000;
+  const port = process.env.SERVER_PORT || 4000;
   app.listen(port, () => {
     console.log(`🚀 GraphQL server ready at http://localhost:${port}/graphql`);
   });
